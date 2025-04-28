@@ -19,7 +19,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Generate RMI stubs for both server classes
-rmic -d bin -classpath bin server.MorpionServer server.GameRoom
+rmic -d bin -classpath bin server.MorpionServer 
 
 echo "Build complete with JDK 8"
 ls -l bin/server/*.class

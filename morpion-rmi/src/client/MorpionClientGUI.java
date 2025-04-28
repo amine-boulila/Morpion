@@ -37,6 +37,16 @@ public class MorpionClientGUI extends JFrame implements MorpionCallback {
     private final Color accentColor = new Color(46, 204, 113);
     private final Color textColor = new Color(51, 51, 51);
 
+    // static {
+    //     // Set the security policy file
+    //     System.setProperty("java.security.policy", "client.policy");
+
+    //     // Enable the security manager
+    //     if (System.getSecurityManager() == null) {
+    //         System.setSecurityManager(new SecurityManager());
+    //     }
+    // }
+
     public MorpionClientGUI() {
         initializeSharedFiles();
         setupGUI();
@@ -362,11 +372,15 @@ public class MorpionClientGUI extends JFrame implements MorpionCallback {
 
     private void loadSharedFile(String fileName) {
         try {
-            // Use the class loader to dynamically load the class
-            Class<?> loadedClass = Class.forName("shared." + fileName.replace(".class", ""));
-            System.out.println("Class " + loadedClass.getName() + " loaded successfully.");
-        } catch (ClassNotFoundException e) {
-            System.err.println("Failed to load class: " + fileName);
+            String url = "http://localhost/shared/";
+            URLClassLoader classLoader = new URLClassLoader(new URL[]{new URL(url)});
+            
+            String className = "shared." + fileName.replace(".class", "");
+            Class<?> loadedClass = classLoader.loadClass(className);
+            
+            System.out.println("Successfully loaded class from Apache: " + loadedClass.getName());
+        } catch (Exception e) {
+            System.err.println("Failed to load class from Apache: " + fileName);
             e.printStackTrace();
         }
     }
