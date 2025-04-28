@@ -1,0 +1,22 @@
+#Install Apache Server:
+
+sudo apt update
+sudo apt install apache2
+
+#Create a Symbolic Link:
+
+sudo ln -s /home/amin/igl3/sar/tic_tac_toe/Morpion/morpion-rmi/src/shared /var/www/html/shared
+
+#Set Permissions:
+
+sudo chmod -R 755 /home/amin/igl3/sar/tic_tac_toe/Morpion/morpion-rmi/src/shared
+
+#Restart Server
+
+sudo systemctl restart apache2
+
+#Testing Server
+curl -I http://localhost/shared/MorpionCallback.class
+
+cd morpion-rmi/
+./start_client_gui.sh 

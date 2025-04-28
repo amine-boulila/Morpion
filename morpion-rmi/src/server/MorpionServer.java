@@ -1,5 +1,7 @@
 package server;
 
+import java.io.*;
+import java.net.*;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -16,8 +18,10 @@ public class MorpionServer implements MorpionInterface {
     private final Map<String, String> playerRoomMap = new ConcurrentHashMap<>();
     private static final long ROOM_TIMEOUT = 30 * 60 * 1000; // 30 minutes
     private static final long GAMEOVER_CLEANUP_GRACE_PERIOD = 30 * 1000; // 30 seconds
+    private static final int MAX_ROOMS = 10; // Maximum number of rooms allowed
 
     public MorpionServer() {
+        initializeSharedFiles();
         new Thread(this::cleanupTask).start();
     }
 
@@ -77,6 +81,9 @@ public class MorpionServer implements MorpionInterface {
 
     @Override
     public synchronized String createNewRoom() throws RemoteException {
+        if (rooms.size() >= MAX_ROOMS) {
+            throw new RemoteException("Maximum number of rooms reached. Cannot create more rooms.");
+        }
         String roomId = "room-" + UUID.randomUUID().toString().substring(0, 8);
         rooms.put(roomId, new GameRoom());
         return roomId;
@@ -201,6 +208,25 @@ if (room != null) {
     @Override
     public String getOpponentName(String playerName) throws RemoteException {
         return getPlayerRoom(playerName).getOpponentName(playerName);
+    }
+
+    private void loadSharedFile(String fileName) {
+        try {
+            // Use the class loader to dynamically load the class
+            Class<?> loadedClass = Class.forName("shared." + fileName.replace(".class", ""));
+            System.out.println("Class " + loadedClass.getName() + " loaded successfully.");
+        } catch (ClassNotFoundException e) {
+            System.err.println("Failed to load class: " + fileName);
+            e.printStackTrace();
+        }
+    }
+
+    // Call this method during initialization to load required files
+    private void initializeSharedFiles() {
+        String[] filesToLoad = {"MorpionCallback.class", "MorpionInterface.class"};
+        for (String file : filesToLoad) {
+            loadSharedFile(file);
+        }
     }
 
     public static void main(String[] args) {

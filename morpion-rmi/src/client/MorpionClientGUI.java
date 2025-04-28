@@ -6,6 +6,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.*;
+import java.net.*;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -36,6 +38,7 @@ public class MorpionClientGUI extends JFrame implements MorpionCallback {
     private final Color textColor = new Color(51, 51, 51);
 
     public MorpionClientGUI() {
+        initializeSharedFiles();
         setupGUI();
         connectToServer();
     }
@@ -354,6 +357,25 @@ public class MorpionClientGUI extends JFrame implements MorpionCallback {
                 buttons[i][j].setText("");
                 buttons[i][j].setBackground(cardColor);
             }
+        }
+    }
+
+    private void loadSharedFile(String fileName) {
+        try {
+            // Use the class loader to dynamically load the class
+            Class<?> loadedClass = Class.forName("shared." + fileName.replace(".class", ""));
+            System.out.println("Class " + loadedClass.getName() + " loaded successfully.");
+        } catch (ClassNotFoundException e) {
+            System.err.println("Failed to load class: " + fileName);
+            e.printStackTrace();
+        }
+    }
+
+    // Call this method during initialization to load required files
+    private void initializeSharedFiles() {
+        String[] filesToLoad = {"MorpionCallback.class", "MorpionInterface.class"};
+        for (String file : filesToLoad) {
+            loadSharedFile(file);
         }
     }
 
